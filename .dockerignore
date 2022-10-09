@@ -1,0 +1,8 @@
+/dapr-sqlite-statestore*
+/Dockerfile
+/*-bake.hcl
+go.work*
+README.md
+/example/
+/.github/
+/.vscode/
