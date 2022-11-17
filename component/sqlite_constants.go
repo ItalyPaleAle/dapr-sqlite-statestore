@@ -25,7 +25,7 @@ const (
 	tableNameKey                = "tableName"
 	cleanupIntervalKey          = "cleanupIntervalInSeconds"
 	defaultTableName            = "state"
-	defaultCleanupInternalInSec = 3600
+	defaultCleanupInternalInSec = 1200
 	operationTimeout            = 15 * time.Second
 
 	createTableTpl = `

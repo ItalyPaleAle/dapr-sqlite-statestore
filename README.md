@@ -36,3 +36,5 @@ spec:
 | Field              | Details | Example |
 |--------------------| --------- | ---------|
 | `connectionString` | The connection string to connect to the database. Usually, that's just the path to a file on disk. If needed, you pass a DSN with the options listed in the [docs for go-sqlite3](https://github.com/mattn/go-sqlite3#connection-string) | `path-to-db.db`<br>DSN: `file:mydb.db?immutable=1` |
+| `tableName` | Name of the table where to store data | `state` |
+| `cleanupIntervalInSeconds` | Interval, in seconds, to purge expired records. Set to <=0 to disable. | `1200` (20 minutes) |
