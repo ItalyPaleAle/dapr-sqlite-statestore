@@ -361,7 +361,7 @@ func (a *sqliteDBAccess) scheduleCleanupExpiredData() {
 	}
 
 	d := *a.cleanupInterval
-	a.logger.Infof("Schedule expired data clean up every %d seconds", d)
+	a.logger.Infof("Schedule expired data clean up every %v", d)
 
 	ticker := time.NewTicker(d)
 	go func() {
