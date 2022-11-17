@@ -14,6 +14,15 @@ Published on GitHub Container Registry:
 ghcr.io/italypaleale/dapr-sqlite-statestore:latest
 ```
 
+## Supported features
+
+- ✅ CRUD
+- ✅ Transactional
+- ✅ ETag
+- ✅ TTL
+- ✅ Actors
+- ❌ Query
+
 ## Setup Dapr component
 
 To setup a SQLite state store, create a component of type `state.sqlite`. See [this guide](https://docs.dapr.io/developing-applications/building-blocks/state-management/howto-get-save-state/) on how to create and apply a state store configuration.
