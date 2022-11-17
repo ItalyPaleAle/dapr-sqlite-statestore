@@ -25,12 +25,12 @@ func main() {
 
 		ctx := context.Background()
 
-		err = client.SaveState(ctx, componentName, "order_1", []byte(strconv.Itoa(orderId)))
+		err = client.SaveState(ctx, componentName, "order_1", []byte(strconv.Itoa(orderId)), nil)
 		if err != nil {
 			panic(err)
 		}
 
-		result, err := client.GetState(ctx, componentName, "order_1")
+		result, err := client.GetState(ctx, componentName, "order_1", nil)
 		if err != nil {
 			panic(err)
 		}
