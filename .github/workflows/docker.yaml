@@ -10,6 +10,9 @@ on:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v3
 
@@ -37,14 +40,14 @@ jobs:
             type=edge,branch=main
 
       - name: Log into GitHub Container Registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Bake: build and push"
-        uses: docker/bake-action@v2.2.0
+        uses: docker/bake-action@v2.3.0
         with:
           push: true
           files: |
