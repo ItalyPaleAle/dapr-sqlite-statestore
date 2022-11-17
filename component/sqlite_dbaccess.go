@@ -54,14 +54,14 @@ type sqliteDBAccess struct {
 	cancel           context.CancelFunc
 
 	// Lock only on public write API. Any public API's implementation should not call other public write APIs.
-	lock *sync.RWMutex
+	lock *sync.Mutex
 }
 
 // newSqliteDBAccess creates a new instance of sqliteDbAccess.
 func newSqliteDBAccess(logger logger.Logger) *sqliteDBAccess {
 	return &sqliteDBAccess{
 		logger: logger,
-		lock:   &sync.RWMutex{},
+		lock:   &sync.Mutex{},
 	}
 }
 
@@ -116,6 +116,9 @@ func (a *sqliteDBAccess) Init(metadata state.Metadata) error {
 }
 
 func (a *sqliteDBAccess) Ping(parentCtx context.Context) error {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+
 	ctx, cancel := context.WithTimeout(parentCtx, operationTimeout)
 	err := a.db.PingContext(ctx)
 	cancel()
@@ -123,14 +126,14 @@ func (a *sqliteDBAccess) Ping(parentCtx context.Context) error {
 }
 
 func (a *sqliteDBAccess) Get(parentCtx context.Context, req *state.GetRequest) (*state.GetResponse, error) {
-	a.lock.RLock()
-	defer a.lock.RUnlock()
+	a.lock.Lock()
+	defer a.lock.Unlock()
 
 	if req.Key == "" {
 		return nil, errors.New("missing key in get operation")
 	}
 	var (
-		value    string
+		value    []byte
 		isBinary bool
 		etag     string
 	)
@@ -138,7 +141,8 @@ func (a *sqliteDBAccess) Get(parentCtx context.Context, req *state.GetRequest) (
 	// Sprintf is required for table name because sql.DB does not substitute parameters for table names.
 	stmt := fmt.Sprintf(getValueTpl, a.tableName)
 	ctx, cancel := context.WithTimeout(parentCtx, operationTimeout)
-	err := a.db.QueryRowContext(ctx, stmt, req.Key).Scan(&value, &isBinary, &etag)
+	err := a.db.QueryRowContext(ctx, stmt, req.Key).
+		Scan(&value, &isBinary, &etag)
 	cancel()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -149,9 +153,11 @@ func (a *sqliteDBAccess) Get(parentCtx context.Context, req *state.GetRequest) (
 		return nil, err
 	}
 	if isBinary {
-		var s string
-		var data []byte
-		if err = json.Unmarshal([]byte(value), &s); err != nil {
+		var (
+			s    string
+			data []byte
+		)
+		if err = json.Unmarshal(value, &s); err != nil {
 			return nil, err
 		}
 		if data, err = base64.StdEncoding.DecodeString(s); err != nil {
@@ -164,7 +170,7 @@ func (a *sqliteDBAccess) Get(parentCtx context.Context, req *state.GetRequest) (
 		}, nil
 	}
 	return &state.GetResponse{
-		Data:     []byte(value),
+		Data:     value,
 		ETag:     &etag,
 		Metadata: req.Metadata,
 	}, nil
@@ -209,12 +215,7 @@ func (a *sqliteDBAccess) Delete(parentCtx context.Context, req *state.DeleteRequ
 	}
 	defer tx.Rollback()
 
-	err = state.DeleteWithOptions(
-		func(req *state.DeleteRequest) error {
-			return a.deleteValue(tx, req)
-		},
-		req,
-	)
+	err = a.deleteValue(tx, req)
 	if err != nil {
 		return err
 	}
