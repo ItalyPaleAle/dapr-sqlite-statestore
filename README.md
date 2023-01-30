@@ -1,3 +1,7 @@
+# Project archived
+
+**This project has been archived as SQLite is available as a built-in compone tin Dapr 1.10.**
+
 # SQLite3 state store for Dapr
 
 This project contains a [pluggable component](https://docs.dapr.io/operations/components/pluggable-components/pluggable-components-overview/) for using SQLite3 as a state store with [Dapr](https://dapr.io).
